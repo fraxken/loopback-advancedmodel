@@ -1,0 +1,24 @@
+{
+  "name": "loopback-advancedmodel",
+  "version": "1.0.0",
+  "description": "Loopback 3.x advanced promisified model with Object-oriented API descriptor",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fraxken/loopback-advancedmodel.git"
+  },
+  "keywords": [
+    "loopback",
+    "model",
+    "async"
+  ],
+  "author": "GENTILHOMME Thomas <Fraxken>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/fraxken/loopback-advancedmodel/issues"
+  },
+  "homepage": "https://github.com/fraxken/loopback-advancedmodel#readme"
+}
