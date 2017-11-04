@@ -98,6 +98,12 @@ class APIDescriptor {
         if('string' !== typeof(arg)) {
             throw new TypeError('arg should be a string');
         }
+        if('string' !== typeof(type)) {
+            throw new TypeError('type should be a string');
+        }
+        if('boolean' !== typeof(required)) {
+            throw new TypeError('required should be a boolean');
+        }
         this._swaggerDescriptor.accepts.push({
             arg,type,required
         });
@@ -116,6 +122,12 @@ class APIDescriptor {
         if('string' !== typeof(arg)) {
             throw new TypeError('arg should be a string');
         }
+        if('string' !== typeof(type)) {
+            throw new TypeError('type should be a string');
+        }
+        if('boolean' !== typeof(root)) {
+            throw new TypeError('root should be a boolean');
+        }
         this._swaggerDescriptor.returns = {
             arg,type,root
         };
@@ -133,6 +145,43 @@ class APIDescriptor {
 }
 
 /**
+ * Properties Validation Set & Handler
+ */
+const propertyValidProperties = new Set(['unique','numeric','length_min','length_max','inclusion','exclusion','absence']);
+const propertyValidHandler = {
+    unique(Model,propertyName,propertyValue) {
+        if(propertyValue === false) return;
+        Model.validatesUniquenessOf(propertyName);
+    },
+    presence(Model,propertyName) {
+        Model.validatesPresenceOf(propertyName);
+    },
+    absence(Model,propertyName) {
+        Model.validatesAbsenceOf(propertyName);
+    },
+    length_min(Model,propertyName,propertyValue) {
+        if('number' !== typeof(propertyValue)) return;
+        Model.validatesLengthOf(propertyName,{min: propertyValue});
+    },
+    length_max(Model,propertyName,propertyValue) {
+        if('number' !== typeof(propertyValue)) return;
+        Model.validatesLengthOf(propertyName,{max: propertyValue});
+    },
+    numeric(Model,propertyName,propertyValue) {
+        if('boolean' !== typeof(propertyValue)) return;
+        Model.validatesNumericalityOf(propertyName,{int: propertyValue});
+    },
+    inclusion(Model,propertyName,propertyValue) {
+        if(propertyValue instanceof Array === false) return;
+        Model.validatesInclusionOf(propertyName,{in: propertyValue});
+    },
+    exclusion(Model,propertyName,propertyValue) {
+        if(propertyValue instanceof Array === false) return;
+        Model.validatesExclusionOf(propertyName,{in: propertyValue});
+    }
+};
+
+/**
  * Class to create a loopback Model and apply an overhead simplication of the original API!
  * @class loopbackModel
  * @extends events
@@ -140,6 +189,8 @@ class APIDescriptor {
  * @property {Boolean} disableBuiltInMethods
  * @property {Array.<String>} disableBuiltInExceptions
  * @property {Set.<APIDescriptor>} remoteMethods
+ * @property {Map.<String,Object>} attributes
+ * @property {Map.<String,Function>} observers
  */
 class loopbackModel extends events {
 
@@ -151,6 +202,37 @@ class loopbackModel extends events {
         this.disableBuiltInMethods = false;
         this.disableBuiltInExceptions = [];
         this.remoteMethods = new Set();
+        this.attributes = new Map();
+        this.observers = new Map();
+    }
+
+    /**
+     * @public
+     * @method loopbackModel.property
+     * @param {String} propertyName 
+     * @param {Object} configuration 
+     * @returns {loopbackModel}
+     * 
+     * @throws {TypeError}
+     */
+    property(propertyName,configuration = {}) {
+        if('string' !== typeof(propertyName)) {
+            throw new TypeError('propertyName should be a string');
+        }
+        if('object' !== typeof(configuration)) {
+            throw new TypeError('configuration should be an object');
+        }
+        const _tConf = {
+            presence: propertyName
+        };
+        for(let key in configuration) {
+            if(propertyValidProperties.has(key) === false) continue;
+            if(key === 'absence') {
+                delete _tConf.presence;
+            }
+            _tConf[key] = configuration[key];
+        }
+        this.attributes.set(propertyName,_tConf);
     }
 
     /**
@@ -206,6 +288,26 @@ class loopbackModel extends events {
 
     /**
      * @public
+     * @method loopbackModel.observe
+     * @param {String} hook 
+     * @param {Function} handler 
+     * @returns {loopbackModel}
+     * 
+     * @throws {TypeError}
+     */
+    observe(hook,handler) {
+        if('string' !== typeof(hook)) {
+            throw new TypeError('hook should be a string');
+        }
+        if('function' !== typeof(handler)) {
+            throw new TypeError('handler should be a function');
+        }
+        this.observers.set(hook,handler);
+        return this;
+    }
+
+    /**
+     * @public
      * @method loopbackModel.export
      * @param {Function} customHandler
      * @returns {Function}
@@ -227,9 +329,20 @@ class loopbackModel extends events {
             // Apply functions in the Model
             this.remoteMethods.forEach((api) => {
                 const methodFn = api.methodFn.bind({Model});
-                console.log(`Register method => ${api.methodName}`);
                 Model[api.methodName] = methodFn;
                 Model.remoteMethod(api.methodName,api.getDescriptor());
+            });
+
+            // Apply properties configuration
+            this.attributes.forEach((attributes,propertyName) => {
+                Object.keys(attributes).forEach( (propertyKey) => {
+                    propertyValidHandler[propertyKey](Model,propertyName,attributes[propertyKey]);
+                });
+            });
+
+            // Apply observers
+            this.observers.forEach((handler,hookName) => {
+                Model.observe(hookName,handler);
             });
         };
     }
