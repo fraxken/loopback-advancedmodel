@@ -43,9 +43,16 @@ function disableModelMethods(model, methodsToExpose = []) {
 }
 
 /**
+ * HTTP Verbose Sets
+ */
+const HTTPValidVerbose = new Set(['get','post','patch','head','delete']);
+const HTTPValidType = new Set(['string','boolean','number','object']);
+
+/**
  * @class APIDescriptor
  * @property {String} methodName 
- * @property {Function} methodFn 
+ * @property {Function} methodFn
+ * @param {Object} _descriptor 
  */
 class APIDescriptor {
 
@@ -57,7 +64,7 @@ class APIDescriptor {
     constructor(methodName,methodFn) {
         this.methodName = methodName;
         this.methodFn = methodFn;
-        this._swaggerDescriptor = {
+        this._descriptor = {
             http: {},
             accepts: [],
             returns: {
@@ -69,10 +76,10 @@ class APIDescriptor {
 
     /**
      * @public
-     * @method loopbackModelAPI.http
+     * @method APIDescriptor.http
      * @param {String} path 
      * @param {String} verb 
-     * @returns {loopbackModelAPI}
+     * @returns {APIDescriptor}
      * 
      * @throws {TypeError}
      */
@@ -80,17 +87,33 @@ class APIDescriptor {
         if('string' !== typeof(path)) {
             throw new TypeError('path should be a string');
         }
-        verb = verb.toLocaleLowerCase();
-        this._swaggerDescriptor.http['verb'] = verb;
-        this._swaggerDescriptor.http['path'] = path;
+        if(HTTPValidVerbose.has(verb.toLowerCase()) === false) {
+            throw new TypeError(`invalid HTTP Verbose ${verb}`);
+        }
+        this._descriptor.http = {verb,path};
         return this;
     }
 
     /**
      * @public
-     * @method loopbackModelAPI.accept
+     * @method APIDescriptor.content
+     * @param {String} contentType 
+     * @return {APIDescriptor}
+     * 
+     * @throws {TypeError}
+     */
+    content(contentType) {
+        if('string' !== typeof(contentType)) {
+            throw new TypeError('content type should be a string');
+        }
+        return this;
+    }
+
+    /**
+     * @public
+     * @method APIDescriptor.accept
      * @param {Object} param0 
-     * @returns {loopbackModelAPI}
+     * @returns {APIDescriptor}
      * 
      * @throws {TypeError}
      */
@@ -98,23 +121,21 @@ class APIDescriptor {
         if('string' !== typeof(arg)) {
             throw new TypeError('arg should be a string');
         }
-        if('string' !== typeof(type)) {
-            throw new TypeError('type should be a string');
-        }
         if('boolean' !== typeof(required)) {
             throw new TypeError('required should be a boolean');
         }
-        this._swaggerDescriptor.accepts.push({
-            arg,type,required
-        });
+        if(HTTPValidType.has(type.toLowerCase()) === false) {
+            throw new TypeError('Invalid type HTTP Type');
+        }
+        this._descriptor.accepts.push({arg,type,required});
         return this;
     }
 
     /**
      * @public
-     * @method loopbackModelAPI.returns
+     * @method APIDescriptor.returns
      * @param {Object} param0 
-     * @returns {loopbackModelAPI}
+     * @returns {APIDescriptor}
      * 
      * @throws {TypeError}
      */
@@ -122,25 +143,23 @@ class APIDescriptor {
         if('string' !== typeof(arg)) {
             throw new TypeError('arg should be a string');
         }
-        if('string' !== typeof(type)) {
-            throw new TypeError('type should be a string');
-        }
         if('boolean' !== typeof(root)) {
             throw new TypeError('root should be a boolean');
         }
-        this._swaggerDescriptor.returns = {
-            arg,type,root
-        };
+        if(HTTPValidType.has(type.toLowerCase()) === false) {
+            throw new TypeError('Invalid type HTTP Type');
+        }
+        this._descriptor.returns = {arg,type,root};
         return this;
     }
 
     /**
      * @public
-     * @method loopbackModelAPI.getDescriptor
+     * @method APIDescriptor.getDescriptor
      * @returns {Object}
      */
     getDescriptor() {
-        return this._swaggerDescriptor;
+        return this._descriptor;
     }
 }
 
@@ -259,7 +278,7 @@ class loopbackModel extends events {
      * @throws {TypeError}
      * @throws {Error}
      */
-    registerRemoteMethod(method) {
+    registerRemoteMethod(method,errorHandler) {
         if('function' !== typeof(method)) {
             throw new TypeError('method should be a function');
         }
@@ -268,16 +287,21 @@ class loopbackModel extends events {
         }
         this.disableBuiltInExceptions.push(method.name);
         const fn = function() {
-            const ctx = {
+            const cb = arguments[arguments.length -1];
+            method({
                 params: arguments,
                 model: this.Model,
                 app: this.Model.app
-            };
-            const cb = arguments[arguments.length -1];
-            method(ctx).then(response => {
+            }).then(response => {
                 cb(null,response);
             }).catch(E => {
-                cb(E);
+                try {
+                    if('undefined' !== typeof(errorHandler)) errorHandler(E);
+                    cb(E);
+                }
+                catch(E) {
+                    cb(E);
+                }
             });
         };
         
