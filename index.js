@@ -45,7 +45,7 @@ function disableModelMethods(model, methodsToExpose = []) {
 /**
  * HTTP Verbose Sets
  */
-const HTTPValidVerbose = new Set(['get','post','patch','head','delete','put']);
+const HTTPValidVerbose = new Set(['get','post','patch','head','delete','put','trace','options','connect']);
 const HTTPValidType = new Set(['string','boolean','number','object']);
 
 /**
