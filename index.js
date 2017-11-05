@@ -116,10 +116,14 @@ class APIDescriptor {
      * @returns {APIDescriptor}
      * 
      * @throws {TypeError}
+     * @throws {Error}
      */
-    accept({ arg , type = 'string', required = false }) {
+    accept({ arg = '' , type = 'string', required = false }) {
         if('string' !== typeof(arg)) {
             throw new TypeError('arg should be a string');
+        }
+        if(arg === '') {
+            throw new Error('arg cannot be an empty string');
         }
         if('boolean' !== typeof(required)) {
             throw new TypeError('required should be a boolean');
@@ -252,6 +256,7 @@ class loopbackModel extends events {
             _tConf[key] = configuration[key];
         }
         this.attributes.set(propertyName,_tConf);
+        return this;
     }
 
     /**
