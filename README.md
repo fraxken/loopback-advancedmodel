@@ -44,9 +44,8 @@ module.exports = Book.export();
 
 # API Documentation
 
-> Work in progress
+Find all documentation on the wiki section right [here](https://github.com/fraxken/loopback-advancedmodel/wiki)
 
 # Roadmap 
 
-- Better API Descriptor support 
-- Method to register new property
+- Find a way to implement ACL to remoteMethods and the whole Model is needed!
