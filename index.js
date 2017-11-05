@@ -45,7 +45,7 @@ function disableModelMethods(model, methodsToExpose = []) {
 /**
  * HTTP Verbose Sets
  */
-const HTTPValidVerbose = new Set(['get','post','patch','head','delete']);
+const HTTPValidVerbose = new Set(['get','post','patch','head','delete','put']);
 const HTTPValidType = new Set(['string','boolean','number','object']);
 
 /**
@@ -87,7 +87,10 @@ class APIDescriptor {
         if('string' !== typeof(path)) {
             throw new TypeError('path should be a string');
         }
-        if(HTTPValidVerbose.has(verb.toLowerCase()) === false) {
+        if('string' !== typeof(verb)) {
+            throw new TypeError('verb should be a string');
+        }
+        if(!HTTPValidVerbose.has(verb.toLowerCase())) {
             throw new TypeError(`invalid HTTP Verbose ${verb}`);
         }
         this._descriptor.http = {verb,path};
@@ -249,7 +252,7 @@ class loopbackModel extends events {
             presence: propertyName
         };
         for(let key in configuration) {
-            if(propertyValidProperties.has(key) === false) continue;
+            if(!propertyValidProperties.has(key)) continue;
             if(key === 'absence') {
                 delete _tConf.presence;
             }
@@ -267,7 +270,7 @@ class loopbackModel extends events {
      * @returns {loopbackModel}
      */
     disableAllMethods(except) {
-        if(except instanceof Array === true) {
+        if(except instanceof Array) {
             this.disableBuiltInExceptions.push(...except);
         }
         this.disableBuiltInMethods = true;
