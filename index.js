@@ -380,14 +380,16 @@ class loopbackModel extends events {
      * @throws {TypeError}
      * @throws {Error}
      */
-    registerRemoteMethod(method,errorHandler) {
+    registerRemoteMethod(method,errorHandler,addToMiddleware = true) {
         if('function' !== typeof(method)) {
             throw new TypeError('method should be a function');
         }
         if(method.name === 'anonymous') {
             throw new Error('method function cannot be anonymous');
         }
-        this.disableBuiltInExceptions.push(method.name);
+        if(addToMiddleware === true) {
+            this.disableBuiltInExceptions.push(method.name);
+        }
         const fn = function() {
             const cb = arguments[arguments.length -1];
             method({
