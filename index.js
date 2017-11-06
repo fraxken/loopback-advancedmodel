@@ -114,6 +114,22 @@ class APIDescriptor {
 
     /**
      * @public
+     * @method APIDescriptor.desc
+     * @param {String} description 
+     * @returns {APIDescriptor}
+     * 
+     * @throws {TypeError}
+     */
+    desc(description) {
+        if('string' !== typeof(description)) {
+            throw new TypeError('description should be a string!');
+        }
+        this._descriptor['description'] = description;
+        return this;
+    }
+
+    /**
+     * @public
      * @method APIDescriptor.accept
      * @param {Object} param0 
      * @returns {APIDescriptor}
