@@ -227,10 +227,10 @@ class APIDescriptor {
         }
         const index = this._descriptor.accepts.push({arg,type,required});
         if('string' === typeof(description)) {
-            this._descriptor.accepts[index] = description;
+            this._descriptor.accepts[index - 1]['description'] = description;
         }
         if('string' === typeof(source)) {
-            this._descriptor.accepts[index].http = {source};
+            this._descriptor.accepts[index - 1]['http'] = {source};
         }
         return this;
     }
