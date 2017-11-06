@@ -212,7 +212,7 @@ class APIDescriptor {
      * @throws {TypeError}
      * @throws {Error}
      */
-    accept({ arg = '' , type = 'string', required = false, description }) {
+    accept({ arg = '' , type = 'string', required = false, description, source }) {
         if('string' !== typeof(arg)) {
             throw new TypeError('arg should be a string');
         }
@@ -228,6 +228,9 @@ class APIDescriptor {
         const index = this._descriptor.accepts.push({arg,type,required});
         if('string' === typeof(description)) {
             this._descriptor.accepts[index] = description;
+        }
+        if('string' === typeof(source)) {
+            this._descriptor.accepts[index].http = {source};
         }
         return this;
     }
