@@ -99,6 +99,81 @@ class APIDescriptor {
 
     /**
      * @public
+     * @method APIDescriptor.get
+     * @param {String} path
+     * @returns {APIDescriptor}
+     * 
+     * @throws {TypeError} 
+     */
+    get(path) {
+        if('string' !== typeof(path)) {
+            throw new TypeError('path should be a string');
+        }
+        return this.http(path,'get');
+    }
+
+    /**
+     * @public
+     * @method APIDescriptor.post
+     * @param {String} path
+     * @returns {APIDescriptor}
+     * 
+     * @throws {TypeError} 
+     */
+    post(path) {
+        if('string' !== typeof(path)) {
+            throw new TypeError('path should be a string');
+        }
+        return this.http(path,'post');
+    }
+
+    /**
+     * @public
+     * @method APIDescriptor.delete
+     * @param {String} path
+     * @returns {APIDescriptor}
+     * 
+     * @throws {TypeError} 
+     */
+    delete(path) {
+        if('string' !== typeof(path)) {
+            throw new TypeError('path should be a string');
+        }
+        return this.http(path,'delete');
+    }
+
+    /**
+     * @public
+     * @method APIDescriptor.put
+     * @param {String} path
+     * @returns {APIDescriptor}
+     * 
+     * @throws {TypeError} 
+     */
+    put(path) {
+        if('string' !== typeof(path)) {
+            throw new TypeError('path should be a string');
+        }
+        return this.http(path,'put');
+    }
+
+    /**
+     * @public
+     * @method APIDescriptor.patch
+     * @param {String} path
+     * @returns {APIDescriptor}
+     * 
+     * @throws {TypeError} 
+     */
+    patch(path) {
+        if('string' !== typeof(path)) {
+            throw new TypeError('path should be a string');
+        }
+        return this.http(path,'patch');
+    }
+
+    /**
+     * @public
      * @method APIDescriptor.content
      * @param {String} contentType 
      * @return {APIDescriptor}
