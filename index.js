@@ -237,6 +237,24 @@ class APIDescriptor {
 
     /**
      * @public
+     * @method APIDescriptor.accept_response
+     * @returns {APIDescriptor}
+     */
+    accept_response() {
+        return this.accept({ arg: 'res', type: 'object', source: 'res' });
+    }
+
+    /**
+     * @public
+     * @method APIDescriptor.accept_request
+     * @returns {APIDescriptor}
+     */
+    accept_request() {
+        return this.accept({ arg: 'req', type: 'object', source: 'req' });
+    }
+
+    /**
+     * @public
      * @method APIDescriptor.returns
      * @param {Object} param0 
      * @returns {APIDescriptor}
