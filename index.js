@@ -99,6 +99,38 @@ class APIDescriptor {
 
     /**
      * @public
+     * @method APIDescriptor.errorStatus
+     * @param {Number} errorCode 
+     * @returns {APIDescriptor}
+     * 
+     * @throws {TypeError}
+     */
+    errorStatus(errorCode) {
+        if('number' !== typeof(errorCode)) {
+            throw new TypeError('erroCode should be a number');
+        }
+        this._descriptor.http.errorStatus = errorCode;
+        return this;
+    }
+
+    /**
+     * @public
+     * @method APIDescriptor.status
+     * @param {Number} statusCode 
+     * @returns {APIDescriptor}
+     * 
+     * @throws {TypeError}
+     */
+    status(statusCode) {
+        if('number' !== typeof(statusCode)) {
+            throw new TypeError('erroCode should be a number');
+        }
+        this._descriptor.http.status = statusCode;
+        return this;
+    }
+
+    /**
+     * @public
      * @method APIDescriptor.get
      * @param {String} path
      * @returns {APIDescriptor}
