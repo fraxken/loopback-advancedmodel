@@ -216,6 +216,7 @@ class APIDescriptor {
         if('string' !== typeof(contentType)) {
             throw new TypeError('content type should be a string');
         }
+        this.contentType = contentType;
         return this;
     }
 
@@ -547,6 +548,12 @@ class loopbackModel extends events {
             this.remoteMethods.forEach((api) => {
                 const methodFn = api.methodFn.bind({Model});
                 Model[api.methodName] = methodFn;
+                if('undefined' !== typeof(api.contentType)) {
+                    Model.afterRemote(api.methodName,function(ctx, instance, next) {
+                        ctx.res.header('Content-Type', api.contentType);
+                        next();
+                    });
+                }
                 Model.remoteMethod(api.methodName,api.getDescriptor());
             });
 
