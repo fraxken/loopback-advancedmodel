@@ -216,6 +216,16 @@ class APIDescriptor {
 
     /**
      * @public
+     * @method APIDescriptor.disable
+     * @returns {APIDescriptor}
+     */
+    disable() {
+        this._descriptor.documented = false;
+        return this;
+    }
+
+    /**
+     * @public
      * @method APIDescriptor.accept
      * @param {Object} param0 
      * @returns {APIDescriptor}
@@ -232,6 +242,9 @@ class APIDescriptor {
         }
         if('boolean' !== typeof(required)) {
             throw new TypeError('required should be a boolean');
+        }
+        if('string' !== typeof(type)) {
+            throw new TypeError('type should be a string');
         }
         const index = this._descriptor.accepts.push({arg,type,required});
         if('string' === typeof(description)) {
@@ -276,8 +289,8 @@ class APIDescriptor {
         if('boolean' !== typeof(root)) {
             throw new TypeError('root should be a boolean');
         }
-        if(HTTPValidType.has(type.toLowerCase()) === false) {
-            throw new TypeError('Invalid type HTTP Type');
+        if('string' !== typeof(type)) {
+            throw new TypeError('type should be a string');
         }
         this._descriptor.returns = {arg,type,root};
         return this;
