@@ -265,7 +265,14 @@ class APIDescriptor {
      * @throws {TypeError}
      * @throws {Error}
      */
-    accept({ arg = '' , type = 'string', required = false, description, source }) {
+    accept({ 
+        arg = '' , 
+        type = 'string', 
+        required = false, 
+        description,
+        defaultValue, 
+        source 
+    }) {
         if('string' !== typeof(arg)) {
             throw new TypeError('arg should be a string');
         }
@@ -284,6 +291,9 @@ class APIDescriptor {
         }
         if('string' === typeof(source)) {
             this._descriptor.accepts[index - 1]['http'] = {source};
+        }
+        if('undefined' !== typeof(defaultValue)) {
+            this._descriptor.accepts[index - 1]['default'] = defaultValue;
         }
         return this;
     }
@@ -314,7 +324,12 @@ class APIDescriptor {
      * 
      * @throws {TypeError}
      */
-    returns({ arg = 'response', type = 'string', root = true }) {
+    returns({ 
+        arg = 'response', 
+        type = 'string', 
+        defaultValue,
+        root = true 
+    }) {
         if('string' !== typeof(arg)) {
             throw new TypeError('arg should be a string');
         }
@@ -324,7 +339,7 @@ class APIDescriptor {
         if('string' !== typeof(type)) {
             throw new TypeError('type should be a string');
         }
-        this._descriptor.returns = {arg,type,root};
+        this._descriptor.returns = {arg,type,root,default: defaultValue};
         return this;
     }
 
