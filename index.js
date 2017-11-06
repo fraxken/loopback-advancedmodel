@@ -46,7 +46,6 @@ function disableModelMethods(model, methodsToExpose = []) {
  * HTTP Verbose Sets
  */
 const HTTPValidVerbose = new Set(['get','post','patch','head','delete','put','trace','options','connect']);
-const HTTPValidType = new Set(['string','boolean','number','object']);
 
 /**
  * @class APIDescriptor
@@ -67,6 +66,7 @@ class APIDescriptor {
         this._descriptor = {
             http: {},
             accepts: [],
+            accessScopes: [],
             returns: {
                 arg: 'response', 
                 type: 'string'
@@ -205,6 +205,17 @@ class APIDescriptor {
 
     /**
      * @public
+     * @method APIDescriptor.scopes
+     * @param {Array<String>} accesScopes
+     * @returns {APIDescriptor}
+     */
+    scopes(...accesScopes) {
+        this._descriptor.accessScopes.push(...accesScopes);
+        return this;
+    }
+
+    /**
+     * @public
      * @method APIDescriptor.accept
      * @param {Object} param0 
      * @returns {APIDescriptor}
@@ -221,9 +232,6 @@ class APIDescriptor {
         }
         if('boolean' !== typeof(required)) {
             throw new TypeError('required should be a boolean');
-        }
-        if(HTTPValidType.has(type.toLowerCase()) === false) {
-            throw new TypeError('Invalid type HTTP Type');
         }
         const index = this._descriptor.accepts.push({arg,type,required});
         if('string' === typeof(description)) {
