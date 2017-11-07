@@ -52,6 +52,7 @@ const HTTPValidVerbose = new Set(['get','post','patch','head','delete','put']);
  * @property {String} methodName 
  * @property {Function} methodFn
  * @param {Object} _descriptor 
+ * @param {Array<Object>} _acls
  */
 class APIDescriptor {
 
@@ -63,6 +64,7 @@ class APIDescriptor {
     constructor(methodName,methodFn) {
         this.methodName = methodName;
         this.methodFn = methodFn;
+        this._acls = [];
         this._descriptor = {
             http: {},
             accepts: [],
@@ -341,6 +343,64 @@ class APIDescriptor {
 
     /**
      * @public
+     * @method APIDescriptor.allow
+     * @param {String} principalId 
+     * @param {String} accessType 
+     * @returns {APIDescriptor}
+     * 
+     * @throws {TypeError}
+     */
+    allow(principalId,accessType = 'EXECUTE') {
+        if('string' !== typeof(principalId)) {
+            throw new TypeError('principalId should be a string!');
+        }
+        if('string' !== typeof(accessType)) {
+            throw new TypeError('accessType should be a string!');
+        }
+        if(principalId.charAt(0) !== '$') {
+            principalId = `$${principalId}`;
+        }
+        this._acls.push({ 
+            principalType: 'ROLE',
+            principalId,
+            permission: 'ALLOW',
+            property: this.methodName,
+            accessType
+        });
+        return this;
+    }
+
+    /**
+     * @public
+     * @method APIDescriptor.deny
+     * @param {String} principalId 
+     * @param {String} accessType 
+     * @returns {APIDescriptor}
+     * 
+     * @throws {TypeError}
+     */
+    deny(principalId,accessType = 'EXECUTE') {
+        if('string' !== typeof(principalId)) {
+            throw new TypeError('principalId should be a string!');
+        }
+        if('string' !== typeof(accessType)) {
+            throw new TypeError('accessType should be a string!');
+        }
+        if(principalId.charAt(0) !== '$') {
+            principalId = `$${principalId}`;
+        }
+        this._acls.push({ 
+            principalType: 'ROLE',
+            principalId,
+            permission: 'DENY',
+            property: this.methodName,
+            accessType
+        });
+        return this;
+    }
+
+    /**
+     * @public
      * @method APIDescriptor.getDescriptor
      * @returns {Object}
      */
@@ -550,6 +610,11 @@ class loopbackModel extends events {
                     });
                 }
                 Model.remoteMethod(api.methodName,api.getDescriptor());
+
+                // Push ACLs
+                if(api._acls.length > 0) {
+                    Model.definition.settings.acls.push(...api._acls);
+                }
             });
 
             // Apply properties configuration
@@ -563,6 +628,7 @@ class loopbackModel extends events {
             this.observers.forEach((handler,hookName) => {
                 Model.observe(hookName,handler);
             });
+
         };
     }
 
