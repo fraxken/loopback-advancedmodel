@@ -412,7 +412,23 @@ class APIDescriptor {
 /**
  * Properties Validation Set & Handler
  */
-const propertyValidProperties = new Set(['unique','numeric','length_min','length_max','inclusion','exclusion','absence']);
+const validTypeProperty = new Set([
+    'unique',
+    'numeric',
+    'length_min',
+    'length_max',
+    'inclusion',
+    'exclusion',
+    'absence',
+    'required',
+    'type'
+]);
+
+const validDefinitionProperty = new Set([
+    'required',
+    'type'
+]);
+
 const propertyValidHandler = {
     unique(Model,propertyName,propertyValue) {
         if(propertyValue === false) return;
@@ -492,7 +508,7 @@ class loopbackModel extends events {
             presence: propertyName
         };
         for(let key in configuration) {
-            if(!propertyValidProperties.has(key)) continue;
+            if(!validTypeProperty.has(key)) continue;
             if(key === 'absence') {
                 delete _tConf.presence;
             }
@@ -621,7 +637,19 @@ class loopbackModel extends events {
 
             // Apply properties configuration
             this.attributes.forEach((attributes,propertyName) => {
+                if(Model.definition.rawProperties.hasOwnProperty(propertyName) === false) {
+                    Model.definition.rawProperties[propertyName] = {};
+                }
+                if(Model.definition.properties.hasOwnProperty(propertyName) === false) {
+                    Model.definition.rawProperties[propertyName] = {};
+                }
                 Object.keys(attributes).forEach( (propertyKey) => {
+                    if(validDefinitionProperty.has(propertyKey)) {
+                        Model.definition.rawProperties[propertyName][propertyKey] = attributes[propertyKey];
+                        Model.definition.properties[propertyName][propertyKey] = attributes[propertyKey];
+                        return;
+                    }
+                    
                     propertyValidHandler[propertyKey](Model,propertyName,attributes[propertyKey]);
                 });
             });
