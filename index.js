@@ -462,13 +462,14 @@ class loopbackModel extends events {
     /**
      * @constructor
      */
-    constructor() {
+    constructor({ isAuthenticated = false }) {
         super();
         this.disableBuiltInMethods = false;
         this.disableBuiltInExceptions = [];
         this.remoteMethods = new Set();
         this.attributes = new Map();
         this.observers = new Map();
+        this.isAuthenticated = isAuthenticated;
     }
 
     /**
@@ -555,6 +556,10 @@ class loopbackModel extends events {
         };
         
         const api = new APIDescriptor(method.name,fn);
+        if(this.isAuthenticated === true) {
+            api.deny('everyone','*');
+            api.allow('authenticated','*');
+        }
         this.remoteMethods.add(api);
         return api;
     }
