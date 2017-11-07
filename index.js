@@ -68,7 +68,6 @@ class APIDescriptor {
         this._descriptor = {
             http: {},
             accepts: [],
-            accessScopes: [],
             returns: {
                 arg: 'response', 
                 type: 'string'
@@ -235,17 +234,6 @@ class APIDescriptor {
             throw new TypeError('description should be a string!');
         }
         this._descriptor['description'] = description;
-        return this;
-    }
-
-    /**
-     * @public
-     * @method APIDescriptor.scopes
-     * @param {Array<String>} accesScopes
-     * @returns {APIDescriptor}
-     */
-    scopes(...accesScopes) {
-        this._descriptor.accessScopes.push(...accesScopes);
         return this;
     }
 
@@ -463,6 +451,14 @@ const propertyValidHandler = {
 };
 
 /**
+ * LoopbackModel constructor
+ * @interface loopbackModelConstructor
+ */
+const loopbackModelConstructor = {
+    isAuthenticated: false
+};
+
+/**
  * Class to create a loopback Model and apply an overhead simplication of the original API!
  * @class loopbackModel
  * @extends events
@@ -472,20 +468,21 @@ const propertyValidHandler = {
  * @property {Set.<APIDescriptor>} remoteMethods
  * @property {Map.<String,Object>} attributes
  * @property {Map.<String,Function>} observers
+ * @property {Boolean} isAuthenticated
  */
 class loopbackModel extends events {
 
     /**
      * @constructor
      */
-    constructor({ isAuthenticated = false }) {
+    constructor(options = {}) {
         super();
         this.disableBuiltInMethods = false;
         this.disableBuiltInExceptions = [];
         this.remoteMethods = new Set();
         this.attributes = new Map();
         this.observers = new Map();
-        this.isAuthenticated = isAuthenticated;
+        Object.assign(this,loopbackModelConstructor,options);
     }
 
     /**
@@ -641,7 +638,7 @@ class loopbackModel extends events {
                     Model.definition.rawProperties[propertyName] = {};
                 }
                 if(Model.definition.properties.hasOwnProperty(propertyName) === false) {
-                    Model.definition.rawProperties[propertyName] = {};
+                    Model.definition.properties[propertyName] = {};
                 }
                 Object.keys(attributes).forEach( (propertyKey) => {
                     if(validDefinitionProperty.has(propertyKey)) {
