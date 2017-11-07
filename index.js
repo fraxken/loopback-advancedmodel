@@ -592,9 +592,6 @@ class loopbackModel extends events {
      */
     export(customHandler) {
         return (Model) => {
-            if('function' === typeof(customHandler)) {
-                customHandler(Model);
-            }
             if(this.disableBuiltInMethods === true) {
                 disableModelMethods(Model,this.disableBuiltInExceptions);
             }
@@ -633,7 +630,9 @@ class loopbackModel extends events {
             this.observers.forEach((handler,hookName) => {
                 Model.observe(hookName,handler);
             });
-
+            if('function' === typeof(customHandler)) {
+                customHandler(Model);
+            }
         };
     }
 
