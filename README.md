@@ -15,6 +15,17 @@ const advancedmodel = require('loopback-advancedmodel');
 
 const Book = new advancedmodel().disableAllMethods();
 
+// Configure Book <uid> property
+Book.property('uid',{
+    unique: true
+});
+
+// Configure Book <name> property
+Book.property('name',{
+    min_length: 2,
+    max_length: 20
+});
+
 // Listen for dataSourceAttached event!
 Book.on('dataSourceAttached',() => {
     console.log('Datasource attached to book model!');
@@ -35,7 +46,9 @@ async function findByTag({ params: [tag], model: bookModel}) {
 
 // Register findByTag method!
 Book.registerRemoteMethod(findByTag)
-    .http('/findByTag/:tag')
+    .deny('*','everyone')
+    .allow('*','authenticated')
+    .get('/findByTag/:tag')
     .accept({ arg: 'tag', type: 'string'})
     .returns({ arg: 'book', type: 'object' });
 
