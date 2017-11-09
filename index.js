@@ -68,10 +68,7 @@ class APIDescriptor {
         this._descriptor = {
             http: {},
             accepts: [],
-            returns: {
-                arg: 'response', 
-                type: 'string'
-            }
+            returns: []
         };
     }
 
@@ -314,7 +311,8 @@ class APIDescriptor {
     returns({ 
         arg = 'response', 
         type = 'string', 
-        root = true 
+        root = true,
+        target 
     }) {
         if('string' !== typeof(arg)) {
             throw new TypeError('arg should be a string');
@@ -325,7 +323,10 @@ class APIDescriptor {
         if('string' !== typeof(type)) {
             throw new TypeError('type should be a string');
         }
-        this._descriptor.returns = {arg,type,root};
+        const index = this._descriptor.returns.push({arg,type,root});
+        if('string' === typeof(target)) {
+            this._descriptor.returns[index - 1]['http'] = {target};
+        }
         return this;
     }
 

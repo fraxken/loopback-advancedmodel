@@ -1,6 +1,6 @@
 {
   "name": "loopback-advancedmodel",
-  "version": "1.8.3",
+  "version": "1.9.0",
   "description": "Loopback 3.x advanced promisified model with Object-oriented API descriptor",
   "main": "index.js",
   "scripts": {
