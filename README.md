@@ -46,8 +46,6 @@ async function findByTag({ params: [tag], model: bookModel}) {
 
 // Register findByTag method!
 Book.registerRemoteMethod(findByTag)
-    .deny('*','everyone')
-    .allow('*','authenticated')
     .get('/findByTag/:tag')
     .accept({ arg: 'tag', type: 'string'})
     .returns({ arg: 'book', type: 'object' });
@@ -58,7 +56,3 @@ module.exports = Book.export();
 # API Documentation
 
 Find all documentation on the wiki section right [here](https://github.com/fraxken/loopback-advancedmodel/wiki)
-
-# Roadmap 
-
-- Find a way to implement ACL to remoteMethods and the whole Model is needed!
