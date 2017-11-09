@@ -46,8 +46,6 @@ async function findByTag({ params: [tag], model: bookModel}) {
 
 // Register findByTag method!
 Book.registerRemoteMethod(findByTag)
-    .deny('*','everyone')
-    .allow('*','authenticated')
     .get('/findByTag/:tag')
     .accept({ arg: 'tag', type: 'string'})
     .returns({ arg: 'book', type: 'object' });
