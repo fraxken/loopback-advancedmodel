@@ -56,7 +56,3 @@ module.exports = Book.export();
 # API Documentation
 
 Find all documentation on the wiki section right [here](https://github.com/fraxken/loopback-advancedmodel/wiki)
-
-# Roadmap 
-
-- Find a way to implement ACL to remoteMethods and the whole Model is needed!
