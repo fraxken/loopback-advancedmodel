@@ -403,6 +403,7 @@ class APIDescriptor {
 const validTypeProperty = new Set([
     'unique',
     'numeric',
+    'presence',
     'length_min',
     'length_max',
     'inclusion',
@@ -502,7 +503,7 @@ class loopbackModel extends events {
             throw new TypeError('configuration should be an object');
         }
         const _tConf = {
-            presence: propertyName
+            presence: configuration.presence || propertyName
         };
         for(let key in configuration) {
             if(!validTypeProperty.has(key)) continue;
