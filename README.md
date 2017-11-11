@@ -1,5 +1,14 @@
 # Loopback-advancedmodel
-Loopback 3.X advanced Promisified model with Object-oriented API Descriptor
+Loopback 3.X advanced Promisified model with an Object-oriented API Descriptor.
+
+# Features
+
+- Promisified remoteMethod with Async/Await support
+- Register multiple property validation easily.
+- Auto-catch throwed error in the remoteMethod.
+- Composable API (Swagger) descriptor (It work like a kind of factory).
+- Lock a whole model for authenticated user
+- Basic ACLs management
 
 # Installation 
 
@@ -7,30 +16,35 @@ Loopback 3.X advanced Promisified model with Object-oriented API Descriptor
 npm install loopback-advancedmodel --save
 ``` 
 
-# Example 
+# Usage example
+
+Here i create a generic book model with a name and tag property ! 
 
 ```js
 'use strict';
 const advancedmodel = require('loopback-advancedmodel');
 
-const Book = new advancedmodel().disableAllMethods();
+// Create your Book Model
+const Book = new advancedmodel()
 
-// Configure Book <uid> property
-Book.property('uid',{
-    unique: true
-});
+// Disable all methods except findOne
+Book.disableAllMethods(['findOne']);
 
 // Configure Book <name> property
 Book.property('name',{
+    unique: true,
     min_length: 2,
     max_length: 20
 });
 
-// Listen for dataSourceAttached event!
+// Eventually listen for dataSourceAttached event!
 Book.on('dataSourceAttached',() => {
     console.log('Datasource attached to book model!');
 });
 
+/**
+ * Find a book by tag!
+ */
 async function findByTag({ params: [tag], model: bookModel}) {
     console.log(`Find book by tag => ${tag}`);
     let book = await bookModel.findOne({ where: {tag} });
@@ -44,12 +58,13 @@ async function findByTag({ params: [tag], model: bookModel}) {
     return book;
 }
 
-// Register findByTag method!
+// Register findByTag method and describe the route for the explorer/Swagger output !
 Book.registerRemoteMethod(findByTag)
     .get('/findByTag/:tag')
     .accept({ arg: 'tag', type: 'string'})
     .returns({ arg: 'book', type: 'object' });
 
+// Export your Model
 module.exports = Book.export();
 ``` 
 
