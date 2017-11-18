@@ -1,6 +1,9 @@
 // Require Node.JS module
 const events = require('events');
 
+// Require Lodash
+const _ = require('lodash');
+
 /**
  * @function disableModelMethods
  * @param {Loopback.Model} model 
@@ -389,6 +392,21 @@ class APIDescriptor {
     }
 
     /**
+     * @method APIDescriptor.extend
+     * @param {APIDescriptor} API 
+     * @returns {APIDescriptor}
+     * 
+     * @throws {TypeError}
+     */
+    extend(API) {
+        if(API instanceof APIDescriptor === false) {
+            throw new TypeError('API should be instanceof APIDescriptor');
+        }
+        Object.assign(this._descriptor, _.cloneDeep(API._descriptor));
+        return this;
+    }
+
+    /**
      * @public
      * @method APIDescriptor.getDescriptor
      * @returns {Object}
@@ -470,6 +488,7 @@ const loopbackModelConstructor = {
  * @property {Set.<APIDescriptor>} remoteMethods
  * @property {Map.<String,Object>} attributes
  * @property {Map.<String,Function>} observers
+ * @property {Function} defaultHandler
  * @property {Boolean} isAuthenticated
  */
 class loopbackModel extends events {
@@ -484,6 +503,7 @@ class loopbackModel extends events {
         this.remoteMethods = new Set();
         this.attributes = new Map();
         this.observers = new Map();
+        this.defaultHandler = undefined;
         Object.assign(this,loopbackModelConstructor,options);
     }
 
@@ -534,6 +554,22 @@ class loopbackModel extends events {
 
     /**
      * @public
+     * @method loopbackModel.defaultErrorHandler
+     * @param {Function} handler 
+     * @returns {APIDescriptor}
+     * 
+     * @throws {TypeError}
+     */
+    defaultErrorHandler(handler) {
+        if('function' !== typeof(handler)) {
+            throw new TypeError('handler should be a function');
+        }
+        this.defaultHandler = handler;
+        return this;
+    }
+
+    /**
+     * @public
      * @method loopbackModel.registerRemoteMethod
      * @param {Function} method 
      * @returns {APIDescriptor}
@@ -561,7 +597,14 @@ class loopbackModel extends events {
                 cb(null,response);
             }).catch(E => {
                 try {
-                    if('undefined' !== typeof(errorHandler)) errorHandler(E);
+                    if('undefined' !== typeof(this.defaultHandler)) {
+                        const ret = this.defaultHandler(E,this.Model.app);
+                        if(ret === true) return;
+                    }
+                    else if('undefined' !== typeof(errorHandler)) {
+                        const ret = errorHandler(E);
+                        if(ret === true) return;
+                    }
                     cb(E);
                 }
                 catch(E) {
@@ -664,6 +707,8 @@ class loopbackModel extends events {
     }
 
 }
+// Link APIDescriptor class to loopbackModel
+loopbackModel.APIDescriptor = APIDescriptor;
 
 // Export loopbackModel class as Default
 module.exports = loopbackModel;
