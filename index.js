@@ -71,8 +71,13 @@ class APIDescriptor {
         this._descriptor = {
             http: {},
             accepts: [],
-            returns: []
+            returns: [],
+            validator: {}
         };
+    }
+
+    get validator() {
+        return this._descriptor.validator;
     }
 
     /**
@@ -257,11 +262,12 @@ class APIDescriptor {
      * @throws {Error}
      */
     accept({ 
-        arg = '' , 
+        arg = '', 
         type = 'string', 
         required = false, 
         description,
-        source 
+        source,
+        validation 
     }) {
         if('string' !== typeof(arg)) {
             throw new TypeError('arg should be a string');
@@ -281,6 +287,12 @@ class APIDescriptor {
         }
         if('string' === typeof(source)) {
             this._descriptor.accepts[index - 1]['http'] = {source};
+        }
+        if('function' === typeof(validation)) {
+            this._descriptor.validator[index - 1] = {
+                name: arg,
+                handler: validation
+            };
         }
         return this;
     }
@@ -587,8 +599,27 @@ class loopbackModel extends events {
         if(addToMiddleware === true) {
             this.disableBuiltInExceptions.push(method.name);
         }
+        let api;
         const fn = function() {
-            const cb = arguments[arguments.length -1];
+            const cb = arguments[arguments.length - 1];
+
+            // Validate arguments...
+            if(Object.keys(api.validator).length > 0) {
+                for(let i in arguments) {
+                    if(!api.validator.hasOwnProperty(i)) continue;
+                    try {
+                        const val = api.validator[i];
+                        val.handler(arguments[i],val.name);
+                    }
+                    catch (E) {
+                        if('undefined' !== typeof(this.defaultHandler)) {
+                            if(this.defaultHandler(E,this.Model.app)) continue;
+                        }
+                        cb(E);
+                    }
+                }
+            }
+            
             method({
                 params: arguments,
                 model: this.Model,
@@ -613,7 +644,7 @@ class loopbackModel extends events {
             });
         };
         
-        const api = new APIDescriptor(method.name,fn);
+        api = new APIDescriptor(method.name,fn);
         if(this.isAuthenticated === true) {
             api.deny('everyone','*');
             api.allow('authenticated','*');
