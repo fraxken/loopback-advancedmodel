@@ -1,73 +1,47 @@
 # Loopback-advancedmodel
-Loopback 3.X advanced Promisified model with an Object-oriented API Descriptor.
+Improved model component for Loopback version 3.x
 
-# Features
+## Features
 
-- Promisified remoteMethod with Async/Await support
-- Register multiple property validation easily.
-- Auto-catch throwed error in the remoteMethod.
-- Composable API (Swagger) descriptor (It work like a kind of factory).
-- Lock a whole model for authenticated user
-- Basic ACLs management
+- Async & Await support
+- Register multiple validators on one property at once.
+- Better generic errors handler.
+- Object-oriented descriptor for OpenAPI (Swagger 2.0).
+- Basic ACLs management support
 
-# Installation 
+## Getting Started
 
-```
-npm install loopback-advancedmodel --save
+This package is available in the Node Package Repository and can be easily installed with [npm](https://docs.npmjs.com/getting-started/what-is-npm) or [yarn](https://yarnpkg.com).
+
+```bash
+$ npm i loopback-advancedmodel
+# or
+$ yarn add loopback-advancedmodel
 ``` 
 
-# Usage example
+Setup your loopback project as usual and then start writing a new model (for example User).
 
-Here i create a generic book model with a name and tag property ! 
+Require the advancedmodel `class` from the package and use it as follow :
 
-```js
-'use strict';
+```javascript
 const advancedmodel = require('loopback-advancedmodel');
 
-// Create your Book Model
-const Book = new advancedmodel()
+// Create your User Model
+const User = new advancedmodel().disableAllMethods();
 
-// Disable all methods except findOne
-Book.disableAllMethods(['findOne']);
-
-// Configure Book <name> property
-Book.property('name',{
-    unique: true,
-    min_length: 2,
-    max_length: 20
-});
-
-// Eventually listen for dataSourceAttached event!
-Book.on('dataSourceAttached',() => {
-    console.log('Datasource attached to book model!');
-});
-
-/**
- * Find a book by tag!
- */
-async function findByTag({ params: [tag], model: bookModel}) {
-    console.log(`Find book by tag => ${tag}`);
-    let book = await bookModel.findOne({ where: {tag} });
-    if(book == null) {
-        book = await bookModel.create({
-            name: 'Example book!',
-            tag
-        });
-    }
-    console.log(book);
-    return book;
+async function sayHello() {
+    return "hello world!";
 }
+// Register the Asynchronous method sayHello on User model and Get the OpenAPI Descriptor Object.
+const OpenAPIDescriptor = User.registerRemoteMethod(sayHello);
 
-// Register findByTag method and describe the route for the explorer/Swagger output !
-Book.registerRemoteMethod(findByTag)
-    .get('/findByTag/:tag')
-    .accept({ arg: 'tag', type: 'string'})
-    .returns({ arg: 'book', type: 'object' });
+// Setup classical OpenAPI informations about our REST Endpoint.
+OpenAPIDescriptor.get('/sayHello').returns({ type: 'string' });
 
-// Export your Model
-module.exports = Book.export();
+// Export the User model
+module.exports = User.export();
 ``` 
 
-# API Documentation
+## Documentation
 
 Find all documentation on the wiki section right [here](https://github.com/fraxken/loopback-advancedmodel/wiki)
