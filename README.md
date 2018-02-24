@@ -45,3 +45,7 @@ module.exports = User.export();
 ## Documentation
 
 Find all documentation on the wiki section right [here](https://github.com/fraxken/loopback-advancedmodel/wiki)
+
+## Contribute
+
+Feel free to create a new issue if you encounter any problems with the package. Pull-requests are welcome too !
