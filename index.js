@@ -48,12 +48,12 @@ function disableModelMethods(model, methodsToExpose = []) {
 /**
  * HTTP Verbose Sets
  */
-const HTTPValidVerbose = new Set(['get','post','patch','head','delete','put']);
+const HTTPValidVerbose = new Set(['get','post','patch','head','delete','put', 'all']);
 
 /**
  * @class APIDescriptor
- * @property {String} methodName 
- * @property {Function} methodFn
+ * @property {!String} methodName Name of the function described
+ * @property {Function} methodFn Function described
  * @param {Object} _descriptor 
  * @param {Array<Object>} _acls
  */
@@ -64,7 +64,7 @@ class APIDescriptor {
      * @param {String} methodName 
      * @param {Function} methodFn 
      */
-    constructor(methodName,methodFn) {
+    constructor(methodName, methodFn) {
         this.methodName = methodName;
         this.methodFn = methodFn;
         this._acls = [];
@@ -83,22 +83,23 @@ class APIDescriptor {
     /**
      * @public
      * @method APIDescriptor.http
-     * @param {String} path 
-     * @param {String} verb 
-     * @returns {APIDescriptor}
+     * @param {!String} path HTTP path (relative to the model) at which the method is exposed.
+     * @param {!String} verb HTTP method (verb) at which the method is available
+     * @returns {APIDescriptor} Return self
      * 
      * @throws {TypeError}
      */
-    http(path,verb = 'get') {
+    http(path, verb = 'post') {
         if('string' !== typeof(path)) {
-            throw new TypeError('path should be a string');
+            throw new TypeError('path argument should be a string');
         }
         if('string' !== typeof(verb)) {
-            throw new TypeError('verb should be a string');
+            throw new TypeError('verb argument should be a string');
         }
         if(!HTTPValidVerbose.has(verb.toLowerCase())) {
             throw new TypeError(`invalid HTTP Verbose ${verb}`);
         }
+
         this._descriptor.http = {verb,path};
         return this;
     }
@@ -106,7 +107,8 @@ class APIDescriptor {
     /**
      * @public
      * @method APIDescriptor.errorStatus
-     * @param {Number} errorCode 
+     * @desc Default HTTP status set when the callback is called with an error
+     * @param {!Number} errorCode errorCode (number)
      * @returns {APIDescriptor}
      * 
      * @throws {TypeError}
@@ -115,15 +117,17 @@ class APIDescriptor {
         if('number' !== typeof(errorCode)) {
             throw new TypeError('erroCode should be a number');
         }
-        this._descriptor.http.errorStatus = errorCode;
+
+        Reflect.set(this._descriptor.http, 'errorStatus', errorCode);
         return this;
     }
 
     /**
      * @public
      * @method APIDescriptor.status
+     * @desc Default HTTP status set when the callback is called without an error.
      * @param {Number} statusCode 
-     * @returns {APIDescriptor}
+     * @returns {APIDescriptor} Return self
      * 
      * @throws {TypeError}
      */
@@ -229,8 +233,9 @@ class APIDescriptor {
     /**
      * @public
      * @method APIDescriptor.desc
-     * @param {String} description 
-     * @returns {APIDescriptor}
+     * @desc Text description of the method, used by API documentation generators such as Swagger.
+     * @param {!String} description the Description
+     * @returns {APIDescriptor} Return self
      * 
      * @throws {TypeError}
      */
@@ -238,7 +243,8 @@ class APIDescriptor {
         if('string' !== typeof(description)) {
             throw new TypeError('description should be a string!');
         }
-        this._descriptor['description'] = description;
+
+        Reflect.set(this._descriptor, 'description', description);
         return this;
     }
 
@@ -255,7 +261,14 @@ class APIDescriptor {
     /**
      * @public
      * @method APIDescriptor.accept
-     * @param {Object} param0 
+     * @desc Defines arguments that the remote method accepts. These arguments map to the static method you define
+     * @param {Object} options Method options
+     * @param {String=} options.arg Argument name
+     * @param {String=} options.type Argument datatype; must be a Loopback type. Additionally, callback arguments allow a special type "file"; see below.
+     * @param {Boolean=} options.required True if argument is required; false otherwise.
+     * @param {String=} options.description A text description of the argument. This is used by API documentation generators like Swagger.
+     * @param {String=} options.source 
+     * @param {any=} options.defaultValue Default value that will be used to populate loopback-explorer input fields and swagger documentation. Note: This value will not be passed into remote methods function if argument is not present.
      * @returns {APIDescriptor}
      * 
      * @throws {TypeError}
@@ -266,6 +279,7 @@ class APIDescriptor {
         type = 'string', 
         required = false, 
         description,
+        defaultValue,
         source,
         validation 
     }) {
@@ -281,7 +295,8 @@ class APIDescriptor {
         if('string' !== typeof(type)) {
             throw new TypeError('type should be a string');
         }
-        const index = this._descriptor.accepts.push({arg,type,required});
+
+        const index = this._descriptor.accepts.push({arg,type,required,default: defaultValue});
         if('string' === typeof(description)) {
             this._descriptor.accepts[index - 1]['description'] = description;
         }
@@ -300,7 +315,8 @@ class APIDescriptor {
     /**
      * @public
      * @method APIDescriptor.accept_response
-     * @returns {APIDescriptor}
+     * @desc Accept middleware HTTP Response
+     * @returns {APIDescriptor} Return self
      */
     accept_response() {
         return this.accept({ arg: 'res', type: 'object', source: 'res' });
@@ -309,7 +325,8 @@ class APIDescriptor {
     /**
      * @public
      * @method APIDescriptor.accept_request
-     * @returns {APIDescriptor}
+     * @desc Accept middleware HTTP Request
+     * @returns {APIDescriptor} Return self
      */
     accept_request() {
         return this.accept({ arg: 'req', type: 'object', source: 'req' });
@@ -318,7 +335,12 @@ class APIDescriptor {
     /**
      * @public
      * @method APIDescriptor.returns
-     * @param {Object} param0 
+     * @param {Object} options Returns options
+     * @param {String=} options.arg Argument name
+     * @param {String=} options.type Argument datatype; must be a Loopback type. Additionally, callback arguments allow a special type "file"; see below.
+     * @param {Boolean=} options.root For callback arguments: set this property to true if your function has a single callback argument to use as the root object returned to remote caller. Otherwise the root object returned is a map (argument-name to argument-value).
+     * @param {any=} options.defaultValue Default value that will be used to populate loopback-explorer input fields and swagger documentation. Note: This value will not be passed into remote methods function if argument is not present.
+     * @param {String=} options.target
      * @returns {APIDescriptor}
      * 
      * @throws {TypeError}
@@ -327,6 +349,7 @@ class APIDescriptor {
         arg = 'response', 
         type = 'string', 
         root = true,
+        defaultValue,
         target 
     }) {
         if('string' !== typeof(arg)) {
@@ -338,7 +361,7 @@ class APIDescriptor {
         if('string' !== typeof(type)) {
             throw new TypeError('type should be a string');
         }
-        const index = this._descriptor.returns.push({arg,type,root});
+        const index = this._descriptor.returns.push({arg,type,root,default: defaultValue});
         if('string' === typeof(target)) {
             this._descriptor.returns[index - 1]['http'] = {target};
         }
@@ -354,7 +377,7 @@ class APIDescriptor {
      * 
      * @throws {TypeError}
      */
-    allow(principalId,accessType = 'EXECUTE') {
+    allow(principalId, accessType = 'EXECUTE') {
         if('string' !== typeof(principalId)) {
             throw new TypeError('principalId should be a string!');
         }
@@ -405,7 +428,8 @@ class APIDescriptor {
 
     /**
      * @method APIDescriptor.extend
-     * @param {APIDescriptor} API 
+     * @desc Extend self by another APIDescriptor (will deepClone properties).
+     * @param {!APIDescriptor} API AIPDescriptor object
      * @returns {APIDescriptor}
      * 
      * @throws {TypeError}
@@ -414,6 +438,7 @@ class APIDescriptor {
         if(API instanceof APIDescriptor === false) {
             throw new TypeError('API should be instanceof APIDescriptor');
         }
+
         Object.assign(this._descriptor, _.cloneDeep(API._descriptor));
         return this;
     }
@@ -421,7 +446,7 @@ class APIDescriptor {
     /**
      * @public
      * @method APIDescriptor.getDescriptor
-     * @returns {Object}
+     * @returns {Object} Return the descriptor (original loopback options!)
      */
     getDescriptor() {
         return this._descriptor;
@@ -553,7 +578,7 @@ class loopbackModel extends events {
      * Disable all loopback model built-in methods
      * @public
      * @method loopbackModel.disableAllMethods
-     * @param {Array<String>} except 
+     * @param {Array<String>=} except 
      * @returns {loopbackModel}
      */
     disableAllMethods(except) {
