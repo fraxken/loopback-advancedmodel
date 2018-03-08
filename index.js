@@ -267,7 +267,7 @@ class APIDescriptor {
      * @param {String=} options.type Argument datatype; must be a Loopback type. Additionally, callback arguments allow a special type "file"; see below.
      * @param {Boolean=} options.required True if argument is required; false otherwise.
      * @param {String=} options.description A text description of the argument. This is used by API documentation generators like Swagger.
-     * @param {String=} options.source 
+     * @param {String|Function=} options.source 
      * @param {any=} options.defaultValue Default value that will be used to populate loopback-explorer input fields and swagger documentation. Note: This value will not be passed into remote methods function if argument is not present.
      * @returns {APIDescriptor}
      * 
@@ -297,13 +297,17 @@ class APIDescriptor {
         }
 
         const index = this._descriptor.accepts.push({arg,type,required,default: defaultValue});
-        if('string' === typeof(description)) {
+        if(typeof description === 'string') {
             this._descriptor.accepts[index - 1]['description'] = description;
         }
-        if('string' === typeof(source)) {
+        const sourceType = typeof source;
+        if(sourceType === 'string') {
             this._descriptor.accepts[index - 1]['http'] = {source};
         }
-        if('function' === typeof(validation)) {
+        else if(sourceType === 'function') {
+            this._descriptor.accepts[index - 1]['http'] = source;
+        }
+        if(typeof validation === 'function') {
             this._descriptor.validator[index - 1] = {
                 name: arg,
                 handler: validation
