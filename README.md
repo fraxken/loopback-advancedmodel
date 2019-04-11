@@ -1,4 +1,8 @@
 # Loopback-advancedmodel
+![version](https://img.shields.io/badge/dynamic/json.svg?url=https://raw.githubusercontent.com/fraxken/loopback-advancedmodel/master/package.json&query=$.version&label=Version)
+[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/fraxken/loopback-advancedmodel/commit-activity)
+![MIT](https://img.shields.io/github/license/mashape/apistatus.svg)
+
 Improved model component for Loopback version 3.x
 
 ## Features
@@ -19,6 +23,7 @@ $ npm i loopback-advancedmodel
 $ yarn add loopback-advancedmodel
 ``` 
 
+## Usage example
 Setup your loopback project as usual and then start writing a new model (for example User).
 
 Require the advancedmodel `class` from the package and use it as follow :
@@ -42,10 +47,8 @@ OpenAPIDescriptor.get('/sayHello').returns({ type: 'string' });
 module.exports = User.export();
 ``` 
 
-## Documentation
-
+## API
 Find all documentation on the wiki section right [here](https://github.com/fraxken/loopback-advancedmodel/wiki)
 
-## Contribute
-
-Feel free to create a new issue if you encounter any problems with the package. Pull-requests are welcome too !
+## License
+MIT
