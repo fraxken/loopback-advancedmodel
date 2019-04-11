@@ -22,6 +22,6 @@
   },
   "homepage": "https://github.com/fraxken/loopback-advancedmodel#readme",
   "dependencies": {
-    "lodash": "^4.17.4"
+    "lodash": "^4.17.11"
   }
 }
