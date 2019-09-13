@@ -1,8 +1,8 @@
-// Require Node.JS module
+// Require Node.js Dependencies
 const events = require('events');
 
-// Require Lodash
-const _ = require('lodash');
+// Require Third-party Dependencies
+const cloneDeep = require("lodash.clonedeep");
 
 /**
  * @function disableModelMethods
@@ -443,7 +443,7 @@ class APIDescriptor {
             throw new TypeError('API should be instanceof APIDescriptor');
         }
 
-        Object.assign(this._descriptor, _.cloneDeep(API._descriptor));
+        Object.assign(this._descriptor, cloneDeep(API._descriptor));
         return this;
     }
 
