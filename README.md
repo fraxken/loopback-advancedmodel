@@ -2,6 +2,9 @@
 ![version](https://img.shields.io/badge/dynamic/json.svg?url=https://raw.githubusercontent.com/fraxken/loopback-advancedmodel/master/package.json&query=$.version&label=Version)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/fraxken/loopback-advancedmodel/commit-activity)
 ![MIT](https://img.shields.io/github/license/mashape/apistatus.svg)
+![dep](https://img.shields.io/david/fraxken/loopback-advancedmodel)
+![size](https://img.shields.io/bundlephobia/min/loopback-advancedmodel)
+[![Known Vulnerabilities](https://snyk.io//test/github/fraxken/loopback-advancedmodel/badge.svg?targetFile=package.json)](https://snyk.io//test/github/fraxken/loopback-advancedmodel?targetFile=package.json)
 
 Improved model component for Loopback version 3.x
 
