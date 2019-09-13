@@ -15,6 +15,9 @@
     "model",
     "async"
   ],
+  "files": [
+      "index.js"
+  ],
   "author": "GENTILHOMME Thomas <Fraxken>",
   "license": "MIT",
   "bugs": {
