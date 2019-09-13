@@ -2,7 +2,7 @@
 const events = require('events');
 
 // Require Third-party Dependencies
-const cloneDeep = require("lodash.clonedeep");
+const cloneDeep = require('lodash.clonedeep');
 
 /**
  * @function disableModelMethods
@@ -635,7 +635,7 @@ class loopbackModel extends events {
             // Validate arguments...
             if(Object.keys(api.validator).length > 0) {
                 for(let i in arguments) {
-                    if(!api.validator.hasOwnProperty(i)) continue;
+                    if (!Reflect.has(api.validator, i)) continue;
                     try {
                         const val = api.validator[i];
                         val.handler(arguments[i],val.name);
@@ -739,10 +739,10 @@ class loopbackModel extends events {
 
             // Apply properties configuration
             this.attributes.forEach((attributes,propertyName) => {
-                if(Model.definition.rawProperties.hasOwnProperty(propertyName) === false) {
+                if (!Reflect.has(Model.definition.rawProperties, propertyName)) {
                     Model.definition.rawProperties[propertyName] = {};
                 }
-                if(Model.definition.properties.hasOwnProperty(propertyName) === false) {
+                if (!Reflect.has(Model.definition.properties, propertyName)) {
                     Model.definition.properties[propertyName] = {};
                 }
                 Object.keys(attributes).forEach( (propertyKey) => {
