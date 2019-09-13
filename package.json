@@ -16,7 +16,7 @@
     "async"
   ],
   "files": [
-      "index.js"
+    "index.js"
   ],
   "author": "GENTILHOMME Thomas <Fraxken>",
   "license": "MIT",
@@ -26,5 +26,8 @@
   "homepage": "https://github.com/fraxken/loopback-advancedmodel#readme",
   "dependencies": {
     "lodash.clonedeep": "^4.5.0"
+  },
+  "devDependencies": {
+    "eslint": "^6.3.0"
   }
 }
